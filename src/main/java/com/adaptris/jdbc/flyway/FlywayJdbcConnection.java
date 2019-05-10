@@ -20,7 +20,9 @@ import java.util.List;
  *
  */
 @XStreamAlias("flyway-jdbc-connection")
-@ComponentProfile(summary = "Extension of JDBC connection which will run flyway migration on init.", tag = "connections,jdbc,flyway")
+@ComponentProfile(summary = "Extension of JDBC connection which will run flyway migration on init.",
+    tag = "connections,jdbc,flyway",
+    since = "3.9.0")
 public class FlywayJdbcConnection extends AdvancedJdbcPooledConnection {
 
   @XStreamImplicit(itemFieldName = "flyway-location")
