@@ -1,0 +1,1 @@
+INSERT INTO sequences (id, seq_number) values ('other', 2)
