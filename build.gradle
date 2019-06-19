@@ -19,7 +19,7 @@ ext {
 
   interlokJavadocs= project.hasProperty('interlokJavadocs') ? project.getProperty('interlokJavadocs') : javadocsBaseUrl + "/interlok-core/" + interlokCoreVersion
   interlokCommonJavadocs= project.hasProperty('interlokCommonJavadocs') ? project.getProperty('interlokCommonJavadocs') : javadocsBaseUrl + "/interlok-common/" + interlokCoreVersion
-  componentName='Interlok Flyway'
+  componentName='Interlok/JDBC Connection with Flyway'
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
   slf4jVersion = '1.7.26'
@@ -185,10 +185,11 @@ publishing {
       artifact sourcesJar { classifier "sources" }
 
       pom.withXml {
-        asNode().appendNode("description", "Interlok Flyway")
+        asNode().appendNode("name", componentName)
+        asNode().appendNode("description", "Custom JDBC Connection implementation that incorporates Flyway database migration")
         def properties = asNode().appendNode("properties")
         properties.appendNode("target", "3.9.0+")
-        properties.appendNode("tags", "flyway")
+        properties.appendNode("tags", "flyway,jdbc")
         properties.appendNode("license", "false")
       }
     }
