@@ -1,0 +1,12 @@
+extraction:
+  java:
+    index:
+      gradle:
+        version: 5.2.1
+
+path_classifiers:
+  test:
+  - "src/test"
+  docs:
+  - "LICENSE*"
+  - "*.md"
