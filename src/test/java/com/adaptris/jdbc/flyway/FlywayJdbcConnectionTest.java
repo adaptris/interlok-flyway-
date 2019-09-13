@@ -1,13 +1,13 @@
 package com.adaptris.jdbc.flyway;
 
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import org.junit.Test;
 import com.adaptris.core.jdbc.DatabaseConnectionCase;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.util.TimeInterval;
-import org.junit.Test;
 
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-
+@SuppressWarnings("deprecation")
 public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcConnection> {
 
   public FlywayJdbcConnectionTest(String arg0) {
@@ -22,21 +22,56 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
     assertEquals("classpath:migration", connection.getFlywayLocations().get(0));
   }
 
-  public void testGetBaseline() {
+  @Test
+  public void testGetBaseline() throws Exception {
     FlywayJdbcConnection connection = new FlywayJdbcConnection();
     assertNull(connection.getBaseline());
-    assertFalse(connection.baseline());
     connection.setBaseline(true);
     assertTrue(connection.getBaseline());
-    assertTrue(connection.baseline());
   }
 
+
+  @Test
+  public void testGetFlyway() throws Exception {
+    FlywayJdbcConnection connection = new FlywayJdbcConnection();
+    assertNull(connection.getFlywayLocations());
+    assertNull(connection.getFlyway());
+    // Should return us the dumb functional interface
+    assertNotNull(connection.migrator());
+    // which means I can do this.
+    connection.migrator().migrate(null);
+    FlywayMigrator migrator = new DefaultFlywayMigrator().withBaseline(true).withFlywayLocations("classpath:migration/partial");
+    connection.setFlyway(migrator);
+    assertSame(migrator, connection.getFlyway());
+    assertSame(migrator, connection.migrator());
+  }
+
+  @Test
+  public void testConnectionWhenInitialisedFullMigration_Legacy() throws Exception {
+    FlywayJdbcConnection con = configure(createConnection(), initialiseFlywayDatabase());
+    try {
+      con.setBaseline(false);
+      con.setFlywayLocations(Collections.singletonList("classpath:migration/full"));
+      LifecycleHelper.init(con);
+      con.connect();
+      FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()));
+    } finally {
+      LifecycleHelper.stopAndClose(con);
+    }
+  }
+
+  @Test
   public void testConnectionWhenInitialisedFullMigration() throws Exception {
     FlywayJdbcConnection con = configure(createConnection(), initialiseFlywayDatabase());
-    con.setBaseline(false);
-    con.setFlywayLocations(Collections.singletonList("classpath:migration/full"));
-    LifecycleHelper.init(con);
-    con.connect();
+    try {
+      con.setFlywayLocations(null);
+      con.setFlyway(new DefaultFlywayMigrator().withFlywayLocations(Collections.singletonList("classpath:migration/full")));
+      LifecycleHelper.init(con);
+      con.connect();
+      FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()));
+    } finally {
+      LifecycleHelper.stopAndClose(con);
+    }
   }
 
   @Override
@@ -58,9 +93,9 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
     flywayJdbcConnection.setConnectionAttempts(1);
     flywayJdbcConnection.setConnectionRetryInterval(new TimeInterval(10L, TimeUnit.MILLISECONDS.name()));
     flywayJdbcConnection.setAlwaysValidateConnection(false);
-    flywayJdbcConnection.setBaseline(true);
-    flywayJdbcConnection.setFlywayLocations(Collections.singletonList("classpath:migration/partial"));
-    return flywayJdbcConnection;
+    // The always-validate tests require a database, so we need to baseline
+    return flywayJdbcConnection
+        .withFlyway(new DefaultFlywayMigrator().withBaseline(true).withFlywayLocations("classpath:migration/partial"));
   }
 
   protected String initialiseFlywayDatabase() throws Exception {
