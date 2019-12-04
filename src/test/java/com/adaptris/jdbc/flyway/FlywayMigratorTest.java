@@ -29,6 +29,20 @@ public class FlywayMigratorTest {
     }
   }
 
+  @Test
+  public void testMigrate_Full_Table() throws Exception {
+    String jdbcUrl = "jdbc:derby:memory:" + GUID.safeUUID() + ";create=true";
+    String table = "alternative_flyway_schema_history";
+    DefaultFlywayMigrator migrator = new DefaultFlywayMigrator().withBaseline(false).withFlywayLocations("classpath:migration/full").withFlywayTable(table);
+    try (C3P0PooledDataSource source = new C3P0PooledDataSource(dataSource(jdbcUrl))) {
+      migrator.migrate(source);
+    }
+    try (Connection db = connection(jdbcUrl)) {
+      verifyCount(1, db);
+      verifyCount(1, db,table);
+    }
+  }
+
   // Expected to fail, since baseline = false.
   @Test(expected = FlywayException.class)
   public void testMigrate_Partial_NoBaseline() throws Exception {
@@ -80,11 +94,16 @@ public class FlywayMigratorTest {
   }
 
   public static void verifyCount(int expected, Connection db) throws Exception {
+    verifyCount(expected, db, "SEQUENCES");
+  }
+
+  public static void verifyCount(int expected, Connection db, String flywayTableName) throws Exception {
     int count = 0;
+    String sql = String.format("SELECT * FROM \"%s\"", flywayTableName);
     try (
-        PreparedStatement s =
-            db.prepareStatement("SELECT * FROM SEQUENCES", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ResultSet rs = s.executeQuery()) {
+            PreparedStatement s =
+                    db.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = s.executeQuery()) {
       if (rs.last()) {
         count = rs.getRow();
       }

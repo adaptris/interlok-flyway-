@@ -7,6 +7,7 @@ import com.adaptris.core.jdbc.DatabaseConnectionCase;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.util.TimeInterval;
 
+
 @SuppressWarnings("deprecation")
 public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcConnection> {
 
@@ -23,13 +24,20 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
   }
 
   @Test
+  public void testGetFlywayTable(){
+    DefaultFlywayMigrator connection = new DefaultFlywayMigrator();
+    assertNull(connection.getFlywayTable());
+    connection.setFlywayTable("table");
+    assertEquals("table", connection.getFlywayTable());
+}
+
+  @Test
   public void testGetBaseline() throws Exception {
     FlywayJdbcConnection connection = new FlywayJdbcConnection();
     assertNull(connection.getBaseline());
     connection.setBaseline(true);
     assertTrue(connection.getBaseline());
   }
-
 
   @Test
   public void testGetFlyway() throws Exception {
@@ -69,6 +77,28 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
       LifecycleHelper.init(con);
       con.connect();
       FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()));
+      FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()), "flyway_schema_history");
+    } finally {
+      LifecycleHelper.stopAndClose(con);
+    }
+  }
+
+  @Test
+  public void testConnectionWithAlternateFlywayTable() throws Exception
+  {
+    String table = "alternative_flyway_schema_history";
+    FlywayJdbcConnection con = configure(createConnection(), initialiseFlywayDatabase());
+    try {
+      con.setFlyway(
+              new DefaultFlywayMigrator()
+                      .withFlywayLocations(Collections.singletonList("classpath:migration/full"))
+                      .withFlywayTable(table)
+      );
+      LifecycleHelper.init(con);
+      con.connect();
+      FlywayMigratorTest.verifyCount(1,FlywayMigratorTest.connection(con.getConnectUrl()));
+      //ensure schema history table has been used instead of default
+      FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()), table);
     } finally {
       LifecycleHelper.stopAndClose(con);
     }

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.sql.DataSource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+
 import org.apache.commons.lang3.BooleanUtils;
 import org.flywaydb.core.Flyway;
 import com.adaptris.annotation.AdvancedConfig;
@@ -15,6 +16,10 @@ import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.util.Args;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
+import com.adaptris.annotation.DisplayOrder;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Perform a database migration using flyway
@@ -24,6 +29,8 @@ import com.thoughtworks.xstream.annotations.XStreamImplicit;
  */
 @ComponentProfile(summary = "Perform a database migration using flyway", since = "3.9.2")
 @XStreamAlias("flyway-jdbc-migrator")
+@DisplayOrder(order = {"flywayLocations", "flywayTable","baseline"})
+
 public class DefaultFlywayMigrator implements FlywayMigrator {
 
   @XStreamImplicit(itemFieldName = "flyway-location")
@@ -33,8 +40,12 @@ public class DefaultFlywayMigrator implements FlywayMigrator {
   private List<String> flywayLocations;
 
   @AdvancedConfig
+  private String flywayTable;
+
+  @AdvancedConfig
   @InputFieldDefault(value = "false")
   private Boolean baseline;
+
 
   public DefaultFlywayMigrator() {
     setFlywayLocations(new ArrayList<>());
@@ -42,7 +53,12 @@ public class DefaultFlywayMigrator implements FlywayMigrator {
 
   @Override
   public void migrate(DataSource source) throws Exception {
-    Flyway flyway = Flyway.configure().dataSource(source).locations(getFlywayLocations().toArray(new String[0])).load();
+    FluentConfiguration configuration = Flyway.configure().dataSource(source)
+            .locations(getFlywayLocations().toArray(new String[]{}));
+    if (!isEmpty(getFlywayTable())) {
+      configuration.table(getFlywayTable());
+    }
+    Flyway flyway = configuration.load();
     if (baseline()) {
       flyway.baseline();
     }
@@ -81,6 +97,7 @@ public class DefaultFlywayMigrator implements FlywayMigrator {
     return baseline;
   }
 
+
   /**
    * Whether to automatically call baseline when migrate is executed against a non-empty schema with
    * no schema history table.
@@ -98,5 +115,28 @@ public class DefaultFlywayMigrator implements FlywayMigrator {
 
   private boolean baseline() {
     return BooleanUtils.toBooleanDefaultIfNull(getBaseline(), false);
+  }
+
+  public String getFlywayTable() {
+    return flywayTable;
+  }
+
+  /**
+   * Alternative schema history table.
+   *
+   * <p>
+   * Optional schema history table. If provided flyway history will be created in this table.
+   * </p>
+   *
+   * @param flywayTable the table. optional. If not provided will use the default flyway history table
+   */
+
+  public void setFlywayTable(String flywayTable) {
+    this.flywayTable = Args.notNull(flywayTable, "flywayTable");
+  }
+
+  public DefaultFlywayMigrator withFlywayTable(String table) {
+    setFlywayTable(table);
+    return this;
   }
 }
