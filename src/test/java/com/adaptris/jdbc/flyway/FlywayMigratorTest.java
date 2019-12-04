@@ -29,7 +29,19 @@ public class FlywayMigratorTest {
     }
   }
 
-  //add test with table check
+  @Test
+  public void testMigrate_Full_Table() throws Exception {
+    String jdbcUrl = "jdbc:derby:memory:" + GUID.safeUUID() + ";create=true";
+    String table = "alternative_flyway_schema_history";
+    DefaultFlywayMigrator migrator = new DefaultFlywayMigrator().withBaseline(false).withFlywayLocations("classpath:migration/full").withFlywayTable(table);
+    try (C3P0PooledDataSource source = new C3P0PooledDataSource(dataSource(jdbcUrl))) {
+      migrator.migrate(source);
+    }
+    try (Connection db = connection(jdbcUrl)) {
+      verifyCount(1, db);
+      verifyCount(1, db,table);
+    }
+  }
 
   // Expected to fail, since baseline = false.
   @Test(expected = FlywayException.class)
@@ -84,8 +96,8 @@ public class FlywayMigratorTest {
   public static void verifyCount(int expected, Connection db) throws Exception {
     verifyCount(expected, db, "SEQUENCES");
   }
+
   public static void verifyCount(int expected, Connection db, String flywayTableName) throws Exception {
-    //verifyCountOfTable(expected, "SEQUENCES", db);
     int count = 0;
     String sql = String.format("SELECT * FROM \"%s\"", flywayTableName);
     try (
@@ -98,8 +110,6 @@ public class FlywayMigratorTest {
     }
     assertEquals(expected, count);
   }
-
-  //public static void verifyCountOfTable(int expected, String flywayTableName Connection db) throws Exception {
 
   public static void logTables(Connection db) throws Exception {
     try (
