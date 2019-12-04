@@ -29,6 +29,8 @@ public class FlywayMigratorTest {
     }
   }
 
+  //add test with table check
+
   // Expected to fail, since baseline = false.
   @Test(expected = FlywayException.class)
   public void testMigrate_Partial_NoBaseline() throws Exception {
@@ -80,17 +82,24 @@ public class FlywayMigratorTest {
   }
 
   public static void verifyCount(int expected, Connection db) throws Exception {
+    verifyCount(expected, db, "SEQUENCES");
+  }
+  public static void verifyCount(int expected, Connection db, String flywayTableName) throws Exception {
+    //verifyCountOfTable(expected, "SEQUENCES", db);
     int count = 0;
+    String sql = String.format("SELECT * FROM \"%s\"", flywayTableName);
     try (
-        PreparedStatement s =
-            db.prepareStatement("SELECT * FROM SEQUENCES", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ResultSet rs = s.executeQuery()) {
+            PreparedStatement s =
+                    db.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = s.executeQuery()) {
       if (rs.last()) {
         count = rs.getRow();
       }
     }
     assertEquals(expected, count);
   }
+
+  //public static void verifyCountOfTable(int expected, String flywayTableName Connection db) throws Exception {
 
   public static void logTables(Connection db) throws Exception {
     try (
