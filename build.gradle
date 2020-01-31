@@ -87,7 +87,7 @@ configurations.all {
 dependencies {
   compile  ("com.adaptris:interlok-core:$interlokCoreVersion") { changing= true}
   compile  ("com.adaptris:interlok-common:$interlokCoreVersion") { changing= true}
-  compile  ("org.flywaydb:flyway-core:6.2.0") { changing= true}
+  compile  ("org.flywaydb:flyway-core:6.2.1") { changing= true}
 
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") {changing= true}
 
