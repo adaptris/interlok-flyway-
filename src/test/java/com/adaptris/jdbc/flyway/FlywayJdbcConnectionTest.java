@@ -1,5 +1,10 @@
 package com.adaptris.jdbc.flyway;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
@@ -11,8 +16,8 @@ import com.adaptris.util.TimeInterval;
 @SuppressWarnings("deprecation")
 public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcConnection> {
 
-  public FlywayJdbcConnectionTest(String arg0) {
-    super(arg0);
+  public FlywayJdbcConnectionTest() {
+    super();
   }
 
   @Test
@@ -130,5 +135,10 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
 
   protected String initialiseFlywayDatabase() throws Exception {
     return "jdbc:derby:memory:" + nameGen.safeUUID() + ";create=true";
+  }
+
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 }
