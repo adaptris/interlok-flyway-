@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
@@ -21,14 +20,6 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
   }
 
   @Test
-  public void testGetFlywayLocations(){
-    FlywayJdbcConnection connection = new FlywayJdbcConnection();
-    connection.setFlywayLocations(Collections.singletonList("classpath:migration"));
-    assertEquals(1, connection.getFlywayLocations().size());
-    assertEquals("classpath:migration", connection.getFlywayLocations().get(0));
-  }
-
-  @Test
   public void testGetFlywayTable(){
     DefaultFlywayMigrator connection = new DefaultFlywayMigrator();
     assertNull(connection.getFlywayTable());
@@ -37,17 +28,8 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
 }
 
   @Test
-  public void testGetBaseline() throws Exception {
-    FlywayJdbcConnection connection = new FlywayJdbcConnection();
-    assertNull(connection.getBaseline());
-    connection.setBaseline(true);
-    assertTrue(connection.getBaseline());
-  }
-
-  @Test
   public void testGetFlyway() throws Exception {
     FlywayJdbcConnection connection = new FlywayJdbcConnection();
-    assertNull(connection.getFlywayLocations());
     assertNull(connection.getFlyway());
     // Should return us the dumb functional interface
     assertNotNull(connection.migrator());
@@ -60,24 +42,9 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
   }
 
   @Test
-  public void testConnectionWhenInitialisedFullMigration_Legacy() throws Exception {
-    FlywayJdbcConnection con = configure(createConnection(), initialiseFlywayDatabase());
-    try {
-      con.setBaseline(false);
-      con.setFlywayLocations(Collections.singletonList("classpath:migration/full"));
-      LifecycleHelper.init(con);
-      con.connect();
-      FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()));
-    } finally {
-      LifecycleHelper.stopAndClose(con);
-    }
-  }
-
-  @Test
   public void testConnectionWhenInitialisedFullMigration() throws Exception {
     FlywayJdbcConnection con = configure(createConnection(), initialiseFlywayDatabase());
     try {
-      con.setFlywayLocations(null);
       con.setFlyway(new DefaultFlywayMigrator().withFlywayLocations(Collections.singletonList("classpath:migration/full")));
       LifecycleHelper.init(con);
       con.connect();
