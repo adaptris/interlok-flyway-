@@ -236,6 +236,7 @@ publishing {
         properties.appendNode("target", "3.9.0+")
         properties.appendNode("tags", "flyway,jdbc")
         properties.appendNode("license", "false")
+        properties.appendNode("repository", "https://github.com/adaptris/interlok-flyway")
       }
     }
   }
