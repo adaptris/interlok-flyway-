@@ -30,7 +30,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @ComponentProfile(summary = "Perform a database migration using flyway", since = "3.9.2")
 @XStreamAlias("flyway-jdbc-migrator")
 @DisplayOrder(order = {"flywayLocations", "flywayTable","baseline"})
-
 public class DefaultFlywayMigrator implements FlywayMigrator {
 
   @XStreamImplicit(itemFieldName = "flyway-location")
