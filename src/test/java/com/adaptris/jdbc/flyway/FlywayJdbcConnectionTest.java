@@ -7,12 +7,11 @@ import static org.junit.Assert.assertSame;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import com.adaptris.core.jdbc.DatabaseConnectionCase;
 import com.adaptris.core.util.LifecycleHelper;
+import com.adaptris.interlok.junit.scaffolding.DatabaseConnectionCase;
 import com.adaptris.util.TimeInterval;
 
 
-@SuppressWarnings("deprecation")
 public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcConnection> {
 
   public FlywayJdbcConnectionTest() {
@@ -90,7 +89,6 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
   private FlywayJdbcConnection configure(FlywayJdbcConnection flywayJdbcConnection, String url) throws Exception {
     flywayJdbcConnection.setConnectUrl(url);
     flywayJdbcConnection.setDriverImp(DRIVER_IMP);
-    flywayJdbcConnection.setTestStatement(DEFAULT_TEST_STATEMENT);
     flywayJdbcConnection.setDebugMode(true);
     flywayJdbcConnection.setConnectionAttempts(1);
     flywayJdbcConnection.setConnectionRetryInterval(new TimeInterval(10L, TimeUnit.MILLISECONDS.name()));
@@ -104,8 +102,4 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
     return "jdbc:derby:memory:" + nameGen.safeUUID() + ";create=true";
   }
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
 }
