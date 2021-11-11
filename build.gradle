@@ -113,7 +113,7 @@ configurations.all {
 dependencies {
   api  ("com.adaptris:interlok-core:$interlokCoreVersion") { changing= true}
   api  ("com.adaptris:interlok-common:$interlokCoreVersion") { changing= true}
-  api  ("org.flywaydb:flyway-core:8.0.3") { changing= true}
+  api  ("org.flywaydb:flyway-core:8.0.4") { changing= true}
   api ("commons-collections:commons-collections:3.2.2")
 
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") {changing= true}
