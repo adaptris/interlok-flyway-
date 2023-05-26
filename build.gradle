@@ -48,8 +48,8 @@ ext.buildInfo = { ->
     }
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 group   = 'com.adaptris'
 version = releaseVersion
 def versionDir = "$buildDir/version"
@@ -82,7 +82,6 @@ repositories {
   maven { url "$nexusBaseUrl/content/groups/public" }
   maven { url "$nexusBaseUrl/content/groups/interlok" }
 }
-
 
 configurations {
   javadoc {}
@@ -118,16 +117,14 @@ dependencies {
 
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") {changing= true}
 
-  testImplementation ('junit:junit:4.13.2')
+  testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.9.3")
   testImplementation ("org.slf4j:slf4j-simple:$slf4jVersion")
   testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing= true }
 
   javadoc("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
   offlineJavadocPackages ("com.adaptris:interlok-core:$interlokCoreVersion:javadoc@jar") { changing= true}
   offlineJavadocPackages ("com.adaptris:interlok-common:$interlokCoreVersion:javadoc@jar") { changing= true}
-
 }
-
 
 jar {
   manifest {
@@ -139,7 +136,6 @@ jar {
                "Implementation-Vendor": organizationName)
   }
 }
-
 
 sourceSets {
   main {
@@ -188,14 +184,12 @@ javadoc {
   }
 }
 
-
 jacocoTestReport {
-    reports {
-        xml.required= true
-        html.required= true
-    }
+  reports {
+    xml.required= true
+    html.required= true
+  }
 }
-
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
   classifier = 'javadoc'
@@ -294,9 +288,12 @@ dependencyCheck  {
   }
 }
 
+test {
+  useJUnitPlatform()
+}
+
 // disable spotbugsTests which checks our test code..
 spotbugsTest.enabled = false
-
 
 check.dependsOn jacocoTestReport
 javadoc.dependsOn offlinePackageList
