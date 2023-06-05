@@ -1,16 +1,18 @@
 package com.adaptris.jdbc.flyway;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.junit.scaffolding.DatabaseConnectionCase;
 import com.adaptris.util.TimeInterval;
-
 
 public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcConnection> {
 
@@ -19,12 +21,12 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
   }
 
   @Test
-  public void testGetFlywayTable(){
+  public void testGetFlywayTable() {
     DefaultFlywayMigrator connection = new DefaultFlywayMigrator();
     assertNull(connection.getFlywayTable());
     connection.setFlywayTable("table");
     assertEquals("table", connection.getFlywayTable());
-}
+  }
 
   @Test
   public void testGetFlyway() throws Exception {
@@ -55,20 +57,16 @@ public class FlywayJdbcConnectionTest extends DatabaseConnectionCase<FlywayJdbcC
   }
 
   @Test
-  public void testConnectionWithAlternateFlywayTable() throws Exception
-  {
+  public void testConnectionWithAlternateFlywayTable() throws Exception {
     String table = "alternative_flyway_schema_history";
     FlywayJdbcConnection con = configure(createConnection(), initialiseFlywayDatabase());
     try {
       con.setFlyway(
-              new DefaultFlywayMigrator()
-                      .withFlywayLocations(Collections.singletonList("classpath:migration/full"))
-                      .withFlywayTable(table)
-      );
+          new DefaultFlywayMigrator().withFlywayLocations(Collections.singletonList("classpath:migration/full")).withFlywayTable(table));
       LifecycleHelper.init(con);
       con.connect();
-      FlywayMigratorTest.verifyCount(1,FlywayMigratorTest.connection(con.getConnectUrl()));
-      //ensure schema history table has been used instead of default
+      FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()));
+      // ensure schema history table has been used instead of default
       FlywayMigratorTest.verifyCount(1, FlywayMigratorTest.connection(con.getConnectUrl()), table);
     } finally {
       LifecycleHelper.stopAndClose(con);
