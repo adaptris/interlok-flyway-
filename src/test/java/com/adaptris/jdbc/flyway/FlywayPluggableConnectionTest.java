@@ -1,11 +1,14 @@
 package com.adaptris.jdbc.flyway;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.junit.scaffolding.DatabaseConnectionCase;
 import com.adaptris.util.TimeInterval;
@@ -69,4 +72,5 @@ public class FlywayPluggableConnectionTest extends DatabaseConnectionCase<Flyway
   protected String initialiseFlywayDatabase() throws Exception {
     return "jdbc:derby:memory:" + nameGen.safeUUID() + ";create=true";
   }
+
 }
